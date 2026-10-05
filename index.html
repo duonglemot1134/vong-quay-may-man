@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vòng quay trúng thưởng V2</title>
+<style>
+:root{--bg:#080d18;--card:#141c2d;--border:#2c3952;--text:#f8fbff;--muted:#aab6cb;--accent:#ffd43b}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#243b68 0,#10182b 38%,#070b14 80%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:14px}
+.app{width:min(100%,1050px);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.brand{font-size:18px;font-weight:900}.admin-open{border:1px solid #52617c;background:#182238;color:#fff;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}
+.customer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 70px);padding-bottom:30px}.wheel{position:relative;width:min(92vw,650px);aspect-ratio:1}.wheel canvas{width:100%;height:100%;display:block;filter:drop-shadow(0 15px 25px #0009)}
+.pointer{position:absolute;z-index:3;left:50%;top:-2px;transform:translateX(-50%);width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:43px solid #fff;filter:drop-shadow(0 3px 6px #000)}
+.spin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;border:8px solid #fff;background:radial-gradient(circle,#fff17a,#ffb300 63%,#ff7200);color:#321900;font-weight:1000;font-size:18px;cursor:pointer;box-shadow:0 5px 22px #0009}.spin:disabled{opacity:.55;cursor:not-allowed}
+.result{margin-top:10px;min-height:30px;padding:12px 22px;border-radius:16px;background:linear-gradient(90deg,#3b126b,#971c67);font-size:22px;font-weight:950;text-align:center;box-shadow:0 8px 25px #0006}
+.hint{color:var(--muted);font-size:12px;margin-top:9px}
+.admin{display:none;margin:18px auto;max-width:1050px}.admin.show{display:block}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:rgba(20,28,45,.96);border:1px solid var(--border);border-radius:18px;padding:18px}.panel h2{margin:0 0 8px;font-size:19px}.muted{color:var(--muted);font-size:13px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 82px 42px;gap:7px;margin:8px 0}.row input{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:#0c1322;color:#fff}.row button,.actions button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:#202a40;color:#fff;cursor:pointer;font-weight:700}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.primary{background:linear-gradient(135deg,#ffd43b,#ff7a00)!important;color:#281500!important;border:0!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.stat{background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}.stat strong{display:block;font-size:20px;margin-top:3px}.bar{height:7px;background:#293348;border-radius:99px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd43b,#ff4d8d,#985cff)}.history{max-height:240px;overflow:auto}.hrow{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}.notice{padding:10px;border-radius:10px;background:#10192b;margin-top:10px;font-size:13px;color:var(--muted)}
+@media(max-width:760px){.admin-grid{grid-template-columns:1fr}.customer{min-height:calc(100vh - 60px)}.result{font-size:18px}.top{padding:0 3px}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div class="brand">🎡 VÒNG QUAY TRÚNG THƯỞNG</div><button id="adminOpen" class="admin-open">⚙️ Cài đặt</button></div>
+<section class="customer">
+<div class="wheel"><div class="pointer"></div><canvas id="cv" width="900" height="900"></canvas><button id="spin" class="spin">QUAY</button></div>
+<div id="result" class="result" aria-live="polite">Chúc bạn may mắn! 🎉</div>
+<div class="hint">Vòng quay dành cho khách hàng</div>
+</section>
+
+<section id="admin" class="admin">
+<div class="admin-grid">
+<section class="panel">
+<h2>⚙️ Cấu hình phần thưởng</h2>
+<div class="muted">Khu vực này chỉ dành cho người quản trị. Ô trên vòng quay luôn chia đều; tỷ lệ chỉ dùng để chọn kết quả.</div>
+<div id="rows"></div>
+<div class="actions"><button id="add" class="primary">＋ Thêm phần thưởng</button><button id="reset">↺ Khôi phục mặc định</button><button id="save" class="primary">💾 Lưu cấu hình</button></div>
+<div id="msg" class="notice"></div>
+</section>
+<section class="panel">
+<h2>📊 Thống kê & lịch sử</h2>
+<div class="stats"><div class="stat"><span class="muted">Đã quay</span><strong id="total">0</strong></div><div class="stat"><span class="muted">Kết quả cuối</span><strong id="last">—</strong></div><div class="stat"><span class="muted">Tổng tỷ lệ</span><strong id="sum">100%</strong></div></div>
+<div id="statsList" style="margin-top:14px"></div>
+<h3 style="margin-bottom:5px">Lịch sử</h3><div id="history" class="history"></div>
+<div class="actions"><button id="clearStats">🗑 Xóa thống kê</button><button id="closeAdmin">✕ Đóng cài đặt</button></div>
+</section>
+</div>
+</section>
+</div>
+
+<script>
+(()=> {
+const cv=document.querySelector('#cv'),ctx=cv.getContext('2d'),spin=document.querySelector('#spin'),result=document.querySelector('#result'),admin=document.querySelector('#admin'),rows=document.querySelector('#rows');
+const totalEl=document.querySelector('#total'),lastEl=document.querySelector('#last'),sumEl=document.querySelector('#sum'),msg=document.querySelector('#msg'),statsList=document.querySelector('#statsList'),historyEl=document.querySelector('#history');
+const KEY='vong_quay_v2_config',STAT='vong_quay_v2_stats';
+const defaults=[{name:'Quà lớn',pct:1,count:0},{name:'Voucher 100.000đ',pct:9,count:0},{name:'Voucher 50.000đ',pct:20,count:0},{name:'Quà tặng',pct:30,count:0},{name:'Chúc may mắn lần sau',pct:40,count:0}];
+let prizes=loadConfig(), statsData=loadStats(), angle=-Math.PI/2,busy=false;
+const colors=['#ff1744','#ff8f00','#ffd600','#00c853','#00b8d4','#2979ff','#651fff','#d500f9','#ff4081','#00e5ff'];
+function loadConfig(){try{let x=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(x)&&x.length>=2)return x.map(p=>({name:String(p.name||'Phần thưởng'),pct:Number(p.pct)||0,count:0}))}catch(e){}return structuredClone(defaults)}
+function loadStats(){try{let x=JSON.parse(localStorage.getItem(STAT));if(x&&typeof x.total==='number')return x}catch(e){}return {total:0,last:'—',history:[],counts:{}}}
+function saveConfig(){localStorage.setItem(KEY,JSON.stringify(prizes.map(p=>({name:p.name,pct:p.pct,count:0}))));msg.textContent='✓ Đã lưu cấu hình trên trình duyệt.'}
+function saveStats(){localStorage.setItem(STAT,JSON.stringify(statsData))}
+function num(v){let n=Number(v);return Number.isFinite(n)&&n>0?n:0}
+function esc(s){return String(s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]))}
+function totalWeight(){return prizes.reduce((a,p)=>a+num(p.pct),0)}
+function buildRows(){rows.innerHTML='';prizes.forEach((p,i)=>{let d=document.createElement('div');d.className='row';d.innerHTML=`<input class="name" value="${esc(p.name)}"><input class="pct" type="number" min="0" step=".1" value="${p.pct}"><button class="remove">×</button>`;d.querySelector('.name').oninput=e=>{p.name=e.target.value||'Phần thưởng '+(i+1);draw();renderStats()};d.querySelector('.pct').oninput=e=>{p.pct=num(e.target.value);update()};d.querySelector('.remove').onclick=()=>{if(prizes.length<=2){msg.textContent='Cần ít nhất 2 phần thưởng.';return}prizes.splice(i,1);buildRows();update()};rows.appendChild(d)});update()}
+function update(){let s=totalWeight();sumEl.textContent=(Math.round(s*10)/10)+'%';msg.textContent=s?'Tỷ lệ được chuẩn hóa theo tổng '+(Math.round(s*10)/10)+'%.':'⚠️ Chưa có tỷ lệ hợp lệ.';draw();renderStats()}
+function draw(){let cx=450,cy=450,r=410,n=prizes.length,step=Math.PI*2/n;ctx.clearRect(0,0,900,900);ctx.save();ctx.translate(cx,cy);ctx.rotate(angle+Math.PI/2);for(let i=0;i<n;i++){let a=i*step;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,a,a+step);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.stroke();ctx.save();ctx.rotate(a+step/2);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.font='900 27px system-ui';let t=prizes[i].name||'Phần thưởng';if(t.length>18)t=t.slice(0,17)+'…';ctx.fillText(t,r-28,9);ctx.restore()}ctx.restore();ctx.beginPath();ctx.arc(cx,cy,59,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#ffb300';ctx.lineWidth=8;ctx.stroke()}
+function pick(){let s=totalWeight();if(s<=0)return -1;let x=Math.random()*s;for(let i=0;i<prizes.length;i++){x-=num(prizes[i].pct);if(x<0)return i}return prizes.length-1}
+function spinWheel(){if(busy)return;let idx=pick();if(idx<0){result.textContent='⚠️ Chưa có tỷ lệ hợp lệ';return}let n=prizes.length,step=Math.PI*2/n,start=angle,norm=((start%(Math.PI*2))+Math.PI*2)%(Math.PI*2),desired=-Math.PI-(idx*step+step/2),delta=desired-norm;while(delta<0)delta+=Math.PI*2;delta+=(5+Math.floor(Math.random()*3))*Math.PI*2;let end=start+delta,t0=performance.now();busy=true;spin.disabled=true;result.textContent='Đang quay…';function f(t){let q=Math.min(1,(t-t0)/4200),e=1-Math.pow(1-q,4);angle=start+(end-start)*e;draw();if(q<1)requestAnimationFrame(f);else{angle=end;busy=false;spin.disabled=false;let name=prizes[idx].name||'Phần thưởng';statsData.total++;statsData.last=name;statsData.counts[name]=(statsData.counts[name]||0)+1;statsData.history.unshift({name,time:new Date().toLocaleTimeString('vi-VN')});statsData.history=statsData.history.slice(0,50);saveStats();result.textContent='🎉 '+name;renderStats()}}requestAnimationFrame(f)}
+function renderStats(){let total=statsData.total,last=statsData.last;totalEl.textContent=total;lastEl.textContent=last.length>14?last.slice(0,13)+'…':last;let s=totalWeight();statsList.innerHTML=prizes.map(p=>{let c=statsData.counts[p.name]||0,actual=total?c/total*100:0,expected=s?num(p.pct)/s*100:0;return `<div><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${esc(p.name)}</span><span>${c} lần · ${actual.toFixed(2)}% / ${expected.toFixed(2)}%</span></div><div class="bar"><i style="width:${Math.min(100,actual)}%"></i></div></div>`}).join('');historyEl.innerHTML=statsData.history.length?statsData.history.map((h,i)=>`<div class="hrow"><span>#${total-i} · ${esc(h.name)}</span><span class="muted">${h.time}</span></div>`).join(''):'<span class="muted">Chưa có lượt quay.</span>'}
+document.querySelector('#adminOpen').onclick=()=>{
+  if(admin.classList.contains('show')){
+    admin.classList.remove('show');
+    document.querySelector('#adminOpen').textContent='⚙️ Cài đặt';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }else{
+    admin.classList.add('show');
+    document.querySelector('#adminOpen').textContent='✕ Đóng cài đặt';
+    buildRows();
+    admin.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+};
+document.querySelector('#closeAdmin').onclick=()=>{
+  admin.classList.remove('show');
+  document.querySelector('#adminOpen').textContent='⚙️ Cài đặt';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+document.querySelector('#save').onclick=()=>{
+  saveConfig();
+  setTimeout(()=>{
+    admin.classList.remove('show');
+    document.querySelector('#adminOpen').textContent='⚙️ Cài đặt';
+    window.scrollTo({top:0,behavior:'smooth'});
+  },350);
+};
+document.querySelector('#add').onclick=()=>{prizes.push({name:'Phần thưởng mới',pct:0,count:0});buildRows();rows.lastElementChild.querySelector('.name').focus()};
+document.querySelector('#reset').onclick=()=>{
+  if(confirm('Khôi phục cấu hình mặc định?')){
+    prizes=structuredClone(defaults);
+    saveConfig();
+    buildRows();
+  }
+};
+document.querySelector('#clearStats').onclick=()=>{if(confirm('Xóa toàn bộ thống kê và lịch sử?')){statsData={total:0,last:'—',history:[],counts:{}};saveStats();renderStats()}};
+spin.onclick=spinWheel;buildRows();renderStats();
+})();
+</script>
+</body>
+</html>
