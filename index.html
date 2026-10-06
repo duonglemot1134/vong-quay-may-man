@@ -3,71 +3,598 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vòng quay trúng thưởng V2</title>
+<title>Vòng quay trúng thưởng V4</title>
 <style>
 :root{--bg:#080d18;--card:#141c2d;--border:#2c3952;--text:#f8fbff;--muted:#aab6cb;--accent:#ffd43b}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#243b68 0,#10182b 38%,#070b14 80%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:14px}
-.app{width:min(100%,1050px);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.brand{font-size:18px;font-weight:900}.admin-open{border:1px solid #52617c;background:#182238;color:#fff;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}
-.customer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 70px);padding-bottom:30px}.wheel{position:relative;width:min(92vw,650px);aspect-ratio:1}.wheel canvas{width:100%;height:100%;display:block;filter:drop-shadow(0 15px 25px #0009)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#243b68 0,#10182b 38%,#070b14 80%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:14px}
+.app{width:min(100%,1050px);margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.brand{font-size:18px;font-weight:900}
+.admin-open{border:1px solid #52617c;background:#182238;color:#fff;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}
+.customer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 70px);padding-bottom:30px}
+.wheel{position:relative;width:min(92vw,650px);aspect-ratio:1}
+.wheel canvas{width:100%;height:100%;display:block;filter:drop-shadow(0 15px 25px #0009)}
 .pointer{position:absolute;z-index:3;left:50%;top:-2px;transform:translateX(-50%);width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:43px solid #fff;filter:drop-shadow(0 3px 6px #000)}
-.spin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;border:8px solid #fff;background:radial-gradient(circle,#fff17a,#ffb300 63%,#ff7200);color:#321900;font-weight:1000;font-size:18px;cursor:pointer;box-shadow:0 5px 22px #0009}.spin:disabled{opacity:.55;cursor:not-allowed}
+.spin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;border:8px solid #fff;background:radial-gradient(circle,#fff17a,#ffb300 63%,#ff7200);color:#321900;font-weight:1000;font-size:18px;cursor:pointer;box-shadow:0 5px 22px #0009}
+.spin:disabled{opacity:.55;cursor:not-allowed}
 .result{margin-top:10px;min-height:30px;padding:12px 22px;border-radius:16px;background:linear-gradient(90deg,#3b126b,#971c67);font-size:22px;font-weight:950;text-align:center;box-shadow:0 8px 25px #0006}
 .hint{color:var(--muted);font-size:12px;margin-top:9px}
-.admin{display:none;margin:18px auto;max-width:1050px}.admin.show{display:block}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:rgba(20,28,45,.96);border:1px solid var(--border);border-radius:18px;padding:18px}.panel h2{margin:0 0 8px;font-size:19px}.muted{color:var(--muted);font-size:13px}
-.row{display:grid;grid-template-columns:minmax(0,1fr) 82px 42px;gap:7px;margin:8px 0}.row input{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:#0c1322;color:#fff}.row button,.actions button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:#202a40;color:#fff;cursor:pointer;font-weight:700}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.primary{background:linear-gradient(135deg,#ffd43b,#ff7a00)!important;color:#281500!important;border:0!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.stat{background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}.stat strong{display:block;font-size:20px;margin-top:3px}.bar{height:7px;background:#293348;border-radius:99px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd43b,#ff4d8d,#985cff)}.history{max-height:240px;overflow:auto}.hrow{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}.notice{padding:10px;border-radius:10px;background:#10192b;margin-top:10px;font-size:13px;color:var(--muted)}
-@media(max-width:760px){.admin-grid{grid-template-columns:1fr}.customer{min-height:calc(100vh - 60px)}.result{font-size:18px}.top{padding:0 3px}}
+.customer-stock{color:#8794aa;font-size:12px;margin-top:5px;min-height:17px}
+
+.admin{display:none;margin:18px auto;max-width:1050px}
+.admin.show{display:block}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:rgba(20,28,45,.96);border:1px solid var(--border);border-radius:18px;padding:18px}
+.panel h2{margin:0 0 8px;font-size:19px}
+.muted{color:var(--muted);font-size:13px}
+.section-title{font-weight:900;margin:15px 0 8px}
+.mode-box,.inventory-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:15px;padding:14px;margin:12px 0}
+.mode-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.mode-btn{border:1px solid var(--border);background:#202a40;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800}
+.mode-btn.active{background:linear-gradient(135deg,#ffd43b,#ff7a00);color:#281500;border-color:transparent}
+.help{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.5}
+.threshold{display:flex;align-items:center;gap:8px;margin-top:10px}
+.threshold input{width:80px}
+.threshold small{display:block;color:var(--muted);margin-top:8px;line-height:1.4}
+
+.row{display:grid;grid-template-columns:minmax(0,1fr) 120px 110px;gap:7px;margin:8px 0;align-items:center}
+.row input[type=text],.row input[type=number]{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:#0c1322;color:#fff}
+.value-wrap{display:flex;gap:5px}
+.qty-input{display:none}
+.jackpot-label{display:none;align-items:center;gap:5px;font-size:11px;font-weight:900;color:#ff8494;white-space:nowrap}
+.jackpot-label input{width:auto}
+.remove{min-height:40px;border:1px solid var(--border);border-radius:9px;background:#202a40;color:#fff;cursor:pointer;font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.actions button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:#202a40;color:#fff;cursor:pointer;font-weight:700;padding:0 13px}
+.primary{background:linear-gradient(135deg,#ffd43b,#ff7a00)!important;color:#281500!important;border:0!important}
+.danger{background:#c62828!important;border-color:#c62828!important}
+.notice{padding:10px;border-radius:10px;background:#10192b;margin-top:10px;font-size:13px;color:var(--muted)}
+
+.inventory-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.inventory-stat{background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.inventory-stat strong{display:block;font-size:21px}
+.inventory-stat span{font-size:11px;color:var(--muted)}
+.reset-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}
+.stat strong{display:block;font-size:20px;margin-top:3px}
+.bar{height:7px;background:#293348;border-radius:99px;overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd43b,#ff4d8d,#985cff)}
+.history{max-height:240px;overflow:auto}
+.hrow{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+
+@media(max-width:760px){
+ .admin-grid{grid-template-columns:1fr}
+ .customer{min-height:calc(100vh - 60px)}
+ .result{font-size:18px}
+ .top{padding:0 3px}
+ .row{grid-template-columns:minmax(0,1fr) 90px 42px}
+ .jackpot-label{font-size:9px}
+ .inventory-stats{grid-template-columns:1fr}
+}
+
+/* V5 visual effects */
+button{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+button:hover{transform:translateY(-2px);filter:brightness(1.08)}
+button:active{transform:translateY(0) scale(.98)}
+.spin{transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
+.spin:hover{transform:translate(-50%,-50%) scale(1.06);box-shadow:0 0 28px #ffd43b99,0 8px 25px #0009}
+.spin:active{transform:translate(-50%,-50%) scale(.96)}
+.wheel{animation:wheelFloat 4s ease-in-out infinite}
+@keyframes wheelFloat{0%,100%{filter:drop-shadow(0 15px 25px #0006)}50%{filter:drop-shadow(0 20px 34px #5b7cff55)}}
+.result{transition:transform .25s ease,box-shadow .25s ease}
+.result.win{animation:winPop .65s ease}
+.result.jackpot{background:linear-gradient(90deg,#7b061f,#ff1744,#ff9800,#ff1744,#7b061f);background-size:250% 100%;animation:jackpotResult .9s ease,gradientMove 1.2s linear infinite}
+@keyframes winPop{0%{transform:scale(.9);opacity:.5}65%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes jackpotResult{0%{transform:scale(.85) rotate(-1deg)}55%{transform:scale(1.1) rotate(1deg)}100%{transform:scale(1)}}
+@keyframes gradientMove{to{background-position:250% 0}}
+.confetti{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;top:-24px;width:9px;height:16px;opacity:0;animation:confettiFall 2.8s cubic-bezier(.12,.7,.25,1) forwards}
+@keyframes confettiFall{0%{transform:translate3d(0,-30px,0) rotate(0deg);opacity:1}100%{transform:translate3d(var(--dx),105vh,0) rotate(var(--rot));opacity:.95}}
+.jackpotFlash{position:fixed;inset:0;z-index:9998;pointer-events:none;background:radial-gradient(circle,rgba(255,215,0,.22),transparent 55%);animation:flash .7s ease forwards}
+@keyframes flash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+.reset-note b{color:#fff}
+
 </style>
 </head>
 <body>
+<div id="confetti" class="confetti" aria-hidden="true"></div>
 <div class="app">
-<div class="top"><div class="brand">🎡 VÒNG QUAY TRÚNG THƯỞNG</div><button id="adminOpen" class="admin-open">⚙️ Cài đặt</button></div>
+
+<div class="top">
+  <div class="brand">🎡 VÒNG QUAY TRÚNG THƯỞNG</div>
+  <button id="adminOpen" class="admin-open">⚙️ Cài đặt</button>
+</div>
+
 <section class="customer">
-<div class="wheel"><div class="pointer"></div><canvas id="cv" width="900" height="900"></canvas><button id="spin" class="spin">QUAY</button></div>
-<div id="result" class="result" aria-live="polite">Chúc bạn may mắn! 🎉</div>
-<div class="hint">Vòng quay dành cho khách hàng</div>
+  <div class="wheel">
+    <div class="pointer"></div>
+    <canvas id="cv" width="900" height="900"></canvas>
+    <button id="spin" class="spin">QUAY</button>
+  </div>
+  <div id="result" class="result" aria-live="polite">Chúc bạn may mắn! 🎉</div>
+  <div id="customerStock" class="customer-stock"></div>
+  <div class="hint">Vòng quay dành cho khách hàng</div>
 </section>
 
 <section id="admin" class="admin">
 <div class="admin-grid">
+
 <section class="panel">
 <h2>⚙️ Cấu hình phần thưởng</h2>
-<div class="muted">Khu vực này chỉ dành cho người quản trị. Ô trên vòng quay luôn chia đều; tỷ lệ chỉ dùng để chọn kết quả.</div>
+<div class="muted">Ô trên vòng quay luôn chia đều. Bạn có thể chọn cách xác định kết quả bằng % hoặc bằng số lượng quà.</div>
+
+<div class="mode-box">
+  <div class="section-title">🎯 Chế độ tính kết quả</div>
+  <div class="mode-buttons">
+    <button id="modePct" class="mode-btn">Theo %</button>
+    <button id="modeQty" class="mode-btn">Theo số lượng quà</button>
+  </div>
+  <div id="pctHelp" class="help">Mỗi phần thưởng được chọn theo tỷ lệ % bạn cài đặt.</div>
+  <div id="qtyHelp" class="help" style="display:none">
+    Quà thường được chọn theo <b>số lượng còn lại</b>. Jackpot bị khóa cho tới khi phát đủ
+    ngưỡng quà thường. Sau khi trúng Jackpot, bộ đếm lại bắt đầu từ 0.
+  </div>
+  <div id="thresholdBox" class="threshold" style="display:none">
+    <input id="jackpotThreshold" type="number" min="1" max="100" step="1" value="50">
+    <span>% tổng quà thường</span>
+  </div>
+  <small id="thresholdExplain" style="display:none;color:#aab6cb;margin-top:7px"></small>
+</div>
+
+<div class="row" style="font-weight:800;color:#aab6cb;font-size:12px">
+  <span>Tên phần thưởng</span>
+  <span id="valueHead">Tỷ lệ %</span>
+  <span></span>
+</div>
 <div id="rows"></div>
-<div class="actions"><button id="add" class="primary">＋ Thêm phần thưởng</button><button id="reset">↺ Khôi phục mặc định</button><button id="save" class="primary">💾 Lưu cấu hình</button></div>
+
+<div class="actions">
+  <button id="add" class="primary">＋ Thêm phần thưởng</button>
+  <button id="reset">↺ Khôi phục mặc định</button>
+  <button id="save" class="primary">💾 Lưu cấu hình</button>
+</div>
 <div id="msg" class="notice"></div>
+
+<div id="inventoryBox" class="inventory-box" style="display:none">
+  <div class="section-title">📦 Kho quà & tiến độ Jackpot</div>
+  <div class="inventory-stats">
+    <div class="inventory-stat"><strong id="normalRemaining">0</strong><span>quà thường còn</span></div>
+    <div class="inventory-stat"><strong id="cycleCount">0 / 0</strong><span>tiến độ mở Jackpot</span></div>
+    <div class="inventory-stat"><strong id="jackpotRemaining">0</strong><span>Jackpot còn lại</span></div>
+  </div>
+  <div class="actions">
+    <button id="resetSpins" type="button" onclick="window.__resetSpins && window.__resetSpins(event)">↻ Reset số lượt quay</button>
+    <button id="resetInventory" type="button" class="danger" onclick="window.__resetInventory && window.__resetInventory(event)">📦 Reset số lượng quà đã trừ</button>
+  </div>
+  <div class="reset-note">
+    <b>Reset số lượt quay:</b> đưa số lượt quay, lịch sử và tiến độ Jackpot về 0. Không thay đổi kho quà.<br>
+    <b>Reset số lượng quà:</b> khôi phục kho về số lượng ban đầu đã lưu và reset tiến độ Jackpot.
+  </div>
+</div>
 </section>
+
 <section class="panel">
 <h2>📊 Thống kê & lịch sử</h2>
-<div class="stats"><div class="stat"><span class="muted">Đã quay</span><strong id="total">0</strong></div><div class="stat"><span class="muted">Kết quả cuối</span><strong id="last">—</strong></div><div class="stat"><span class="muted">Tổng tỷ lệ</span><strong id="sum">100%</strong></div></div>
+<div class="stats">
+  <div class="stat"><span class="muted">Đã quay</span><strong id="total">0</strong></div>
+  <div class="stat"><span class="muted">Kết quả cuối</span><strong id="last">—</strong></div>
+  <div class="stat"><span class="muted">Chế độ</span><strong id="modeText">%</strong></div>
+</div>
 <div id="statsList" style="margin-top:14px"></div>
-<h3 style="margin-bottom:5px">Lịch sử</h3><div id="history" class="history"></div>
-<div class="actions"><button id="clearStats">🗑 Xóa thống kê</button><button id="closeAdmin">✕ Đóng cài đặt</button></div>
+<h3 style="margin-bottom:5px">Lịch sử</h3>
+<div id="history" class="history"></div>
+<div class="actions">
+  <button id="clearStats">🗑 Xóa thống kê</button>
+  <button id="closeAdmin">✕ Đóng cài đặt</button>
+</div>
 </section>
+
 </div>
 </section>
 </div>
 
 <script>
-(()=> {
-const cv=document.querySelector('#cv'),ctx=cv.getContext('2d'),spin=document.querySelector('#spin'),result=document.querySelector('#result'),admin=document.querySelector('#admin'),rows=document.querySelector('#rows');
-const totalEl=document.querySelector('#total'),lastEl=document.querySelector('#last'),sumEl=document.querySelector('#sum'),msg=document.querySelector('#msg'),statsList=document.querySelector('#statsList'),historyEl=document.querySelector('#history');
-const KEY='vong_quay_v2_config',STAT='vong_quay_v2_stats';
-const defaults=[{name:'Quà lớn',pct:1,count:0},{name:'Voucher 100.000đ',pct:9,count:0},{name:'Voucher 50.000đ',pct:20,count:0},{name:'Quà tặng',pct:30,count:0},{name:'Chúc may mắn lần sau',pct:40,count:0}];
-let prizes=loadConfig(), statsData=loadStats(), angle=-Math.PI/2,busy=false;
+(()=>{
+const cv=document.querySelector('#cv'),ctx=cv.getContext('2d');
+const spin=document.querySelector('#spin'),result=document.querySelector('#result');
+const admin=document.querySelector('#admin'),rows=document.querySelector('#rows');
+const totalEl=document.querySelector('#total'),lastEl=document.querySelector('#last');
+const statsList=document.querySelector('#statsList'),historyEl=document.querySelector('#history');
+const msg=document.querySelector('#msg'),customerStock=document.querySelector('#customerStock');
+const modePct=document.querySelector('#modePct'),modeQty=document.querySelector('#modeQty');
+const qtyHelp=document.querySelector('#qtyHelp'),pctHelp=document.querySelector('#pctHelp');
+const thresholdBox=document.querySelector('#thresholdBox'),thresholdInput=document.querySelector('#jackpotThreshold');
+const thresholdExplain=document.querySelector('#thresholdExplain');
+const inventoryBox=document.querySelector('#inventoryBox');
+const normalRemainingEl=document.querySelector('#normalRemaining');
+const cycleCountEl=document.querySelector('#cycleCount');
+const jackpotRemainingEl=document.querySelector('#jackpotRemaining');
+const modeText=document.querySelector('#modeText');
+
+const CONFIG_KEY='vong_quay_v5_config';
+const STATS_KEY='vong_quay_v5_stats';
+const STATE_KEY='vong_quay_v5_state';
+const ORIGINAL_KEY='vong_quay_v5_original_qty';
+const OLD_KEY='vong_quay_v2_config';
+
+const defaultPrizes=[
+ {id:'p1',name:'ĐÈN PIN KẸP',pct:25,qty:25,jackpot:false},
+ {id:'p2',name:'THÂN QUẠT TÍCH ĐIỆN',pct:13,qty:13,jackpot:false},
+ {id:'p3',name:'BỘ PIN 8A.h 20 CELL',pct:1,qty:1,jackpot:true},
+ {id:'p4',name:'THÂN MÁY MÀI PIN',pct:1,qty:1,jackpot:true},
+ {id:'p5',name:'PHIẾU THỬ VẬN MAY LẦN SAU',pct:60,qty:60,jackpot:false}
+];
+
 const colors=['#ff1744','#ff8f00','#ffd600','#00c853','#00b8d4','#2979ff','#651fff','#d500f9','#ff4081','#00e5ff'];
-function loadConfig(){try{let x=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(x)&&x.length>=2)return x.map(p=>({name:String(p.name||'Phần thưởng'),pct:Number(p.pct)||0,count:0}))}catch(e){}return structuredClone(defaults)}
-function loadStats(){try{let x=JSON.parse(localStorage.getItem(STAT));if(x&&typeof x.total==='number')return x}catch(e){}return {total:0,last:'—',history:[],counts:{}}}
-function saveConfig(){localStorage.setItem(KEY,JSON.stringify(prizes.map(p=>({name:p.name,pct:p.pct,count:0}))));msg.textContent='✓ Đã lưu cấu hình trên trình duyệt.'}
-function saveStats(){localStorage.setItem(STAT,JSON.stringify(statsData))}
-function num(v){let n=Number(v);return Number.isFinite(n)&&n>0?n:0}
-function esc(s){return String(s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]))}
-function totalWeight(){return prizes.reduce((a,p)=>a+num(p.pct),0)}
-function buildRows(){rows.innerHTML='';prizes.forEach((p,i)=>{let d=document.createElement('div');d.className='row';d.innerHTML=`<input class="name" value="${esc(p.name)}"><input class="pct" type="number" min="0" step=".1" value="${p.pct}"><button class="remove">×</button>`;d.querySelector('.name').oninput=e=>{p.name=e.target.value||'Phần thưởng '+(i+1);draw();renderStats()};d.querySelector('.pct').oninput=e=>{p.pct=num(e.target.value);update()};d.querySelector('.remove').onclick=()=>{if(prizes.length<=2){msg.textContent='Cần ít nhất 2 phần thưởng.';return}prizes.splice(i,1);buildRows();update()};rows.appendChild(d)});update()}
-function update(){let s=totalWeight();sumEl.textContent=(Math.round(s*10)/10)+'%';msg.textContent=s?'Tỷ lệ được chuẩn hóa theo tổng '+(Math.round(s*10)/10)+'%.':'⚠️ Chưa có tỷ lệ hợp lệ.';draw();renderStats()}
-function draw(){let cx=450,cy=450,r=410,n=prizes.length,step=Math.PI*2/n;ctx.clearRect(0,0,900,900);ctx.save();ctx.translate(cx,cy);ctx.rotate(angle+Math.PI/2);for(let i=0;i<n;i++){let a=i*step;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,a,a+step);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.stroke();ctx.save();ctx.rotate(a+step/2);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.font='900 27px system-ui';let t=prizes[i].name||'Phần thưởng';if(t.length>18)t=t.slice(0,17)+'…';ctx.fillText(t,r-28,9);ctx.restore()}ctx.restore();ctx.beginPath();ctx.arc(cx,cy,59,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#ffb300';ctx.lineWidth=8;ctx.stroke()}
-function pick(){let s=totalWeight();if(s<=0)return -1;let x=Math.random()*s;for(let i=0;i<prizes.length;i++){x-=num(prizes[i].pct);if(x<0)return i}return prizes.length-1}
-function spinWheel(){if(busy)return;let idx=pick();if(idx<0){result.textContent='⚠️ Chưa có tỷ lệ hợp lệ';return}let n=prizes.length,step=Math.PI*2/n,start=angle,norm=((start%(Math.PI*2))+Math.PI*2)%(Math.PI*2),desired=-Math.PI-(idx*step+step/2),delta=desired-norm;while(delta<0)delta+=Math.PI*2;delta+=(5+Math.floor(Math.random()*3))*Math.PI*2;let end=start+delta,t0=performance.now();busy=true;spin.disabled=true;result.textContent='Đang quay…';function f(t){let q=Math.min(1,(t-t0)/4200),e=1-Math.pow(1-q,4);angle=start+(end-start)*e;draw();if(q<1)requestAnimationFrame(f);else{angle=end;busy=false;spin.disabled=false;let name=prizes[idx].name||'Phần thưởng';statsData.total++;statsData.last=name;statsData.counts[name]=(statsData.counts[name]||0)+1;statsData.history.unshift({name,time:new Date().toLocaleTimeString('vi-VN')});statsData.history=statsData.history.slice(0,50);saveStats();result.textContent='🎉 '+name;renderStats()}}requestAnimationFrame(f)}
-function renderStats(){let total=statsData.total,last=statsData.last;totalEl.textContent=total;lastEl.textContent=last.length>14?last.slice(0,13)+'…':last;let s=totalWeight();statsList.innerHTML=prizes.map(p=>{let c=statsData.counts[p.name]||0,actual=total?c/total*100:0,expected=s?num(p.pct)/s*100:0;return `<div><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${esc(p.name)}</span><span>${c} lần · ${actual.toFixed(2)}% / ${expected.toFixed(2)}%</span></div><div class="bar"><i style="width:${Math.min(100,actual)}%"></i></div></div>`}).join('');historyEl.innerHTML=statsData.history.length?statsData.history.map((h,i)=>`<div class="hrow"><span>#${total-i} · ${esc(h.name)}</span><span class="muted">${h.time}</span></div>`).join(''):'<span class="muted">Chưa có lượt quay.</span>'}
+
+let drawMode=localStorage.getItem('vong_quay_draw_mode')||'qty';
+let jackpotThresholdPct=Number(localStorage.getItem('vong_quay_jackpot_threshold')||50);
+let statsData=loadStats();
+let state=loadState();
+let prizes=loadConfig();
+let originalQty=loadOriginalQty();
+if(!originalQty){
+  originalQty=prizes.map(p=>Math.max(0,Math.floor(Number(p.qty)||0)));
+  localStorage.setItem(ORIGINAL_KEY,JSON.stringify(originalQty));
+}
+let angle=-Math.PI/2,busy=false;
+
+function uid(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function num(v){const n=Number(v);return Number.isFinite(n)&&n>0?n:0}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+function loadConfig(){
+  try{
+    const raw=localStorage.getItem(CONFIG_KEY);
+    if(raw){
+      const x=JSON.parse(raw);
+      if(Array.isArray(x)&&x.length>=2)return normalize(x);
+    }
+    // Upgrade the previous V2/V3 configuration if it exists.
+    const old=localStorage.getItem(OLD_KEY);
+    if(old){
+      const x=JSON.parse(old);
+      if(Array.isArray(x)&&x.length>=2){
+        return x.map((p,i)=>({id:'p'+(i+1),name:String(p.name||'Phần thưởng'),pct:num(p.pct),qty:1,jackpot:false}));
+      }
+    }
+  }catch(e){}
+  return structuredClone(defaultPrizes);
+}
+
+function normalize(arr){
+  return arr.map((p,i)=>({
+    id:String(p.id||('p'+(i+1))),
+    name:String(p.name||'Phần thưởng'),
+    pct:num(p.pct),
+    qty:Math.max(0,Math.floor(Number(p.qty) || 0)),
+    jackpot:!!p.jackpot
+  }));
+}
+
+function loadStats(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STATS_KEY));
+    if(x&&typeof x.total==='number')return x;
+  }catch(e){}
+  return {total:0,last:'—',history:[],counts:{}};
+}
+
+function loadState(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STATE_KEY));
+    if(x&&typeof x.normalCycleCount==='number'&&Array.isArray(x.initialQty)){
+      return x;
+    }
+  }catch(e){}
+  return {normalCycleCount:0,initialQty:null};
+}
+
+function loadOriginalQty(){
+  try{
+    const x=JSON.parse(localStorage.getItem(ORIGINAL_KEY));
+    if(Array.isArray(x)&&x.length===prizes.length)return x.map(v=>Math.max(0,Math.floor(Number(v)||0)));
+  }catch(e){}
+  return null;
+}
+
+function saveAll(){
+  localStorage.setItem(CONFIG_KEY,JSON.stringify(prizes));
+  localStorage.setItem(STATS_KEY,JSON.stringify(statsData));
+  state.initialQty=originalQty.slice();
+  localStorage.setItem(STATE_KEY,JSON.stringify(state));
+  localStorage.setItem(ORIGINAL_KEY,JSON.stringify(originalQty));
+  localStorage.setItem('vong_quay_draw_mode',drawMode);
+  localStorage.setItem('vong_quay_jackpot_threshold',String(jackpotThresholdPct));
+}
+
+function totalWeight(){return prizes.reduce((s,p)=>s+num(p.pct),0)}
+function normalInitialTotal(){
+  return prizes.reduce((s,p,i)=>s+(p.jackpot?0:Number(originalQty[i]??p.qty)||0),0);
+}
+function jackpotThreshold(){
+  const total=normalInitialTotal();
+  return total>0?Math.max(1,Math.ceil(total*jackpotThresholdPct/100)):0;
+}
+function jackpotUnlocked(){return jackpotThreshold()>0&&state.normalCycleCount>=jackpotThreshold()}
+
+function buildRows(){
+  rows.innerHTML='';
+  prizes.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='row';
+    d.innerHTML=`
+      <input type="text" class="name" value="${esc(p.name)}">
+      <div class="value-wrap">
+        <input class="pct-input" type="number" min="0" step=".1" value="${p.pct}">
+        <input class="qty-input" type="number" min="0" step="1" value="${p.qty}">
+      </div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <label class="jackpot-label"><input type="checkbox" class="jackpot" ${p.jackpot?'checked':''}> JACKPOT</label>
+        <button class="remove">×</button>
+      </div>`;
+
+    d.querySelector('.name').oninput=e=>{
+      p.name=e.target.value||('Phần thưởng '+(i+1));
+      saveAll();draw();renderStats();
+    };
+    d.querySelector('.pct-input').oninput=e=>{
+      p.pct=num(e.target.value);
+      saveAll();updateAdmin();
+    };
+    d.querySelector('.qty-input').oninput=e=>{
+      p.qty=Math.max(0,Math.floor(Number(e.target.value)||0));
+      // Changing quantity updates the live stock, but reset returns to the saved original stock.
+      saveAll();updateAdmin();
+    };
+    d.querySelector('.jackpot').onchange=e=>{
+      p.jackpot=e.target.checked;
+      state.normalCycleCount=0;
+      saveAll();updateAdmin();
+    };
+    d.querySelector('.remove').onclick=()=>{
+      if(prizes.length<=2){msg.textContent='Cần ít nhất 2 phần thưởng.';return}
+      prizes.splice(i,1);
+      state.initialQty=prizes.map(x=>x.qty);
+      state.normalCycleCount=0;
+      saveAll();buildRows();draw();updateAdmin();
+    };
+    rows.appendChild(d);
+  });
+  refreshRowMode();
+  updateAdmin();
+}
+
+function refreshRowMode(){
+  const qtyMode=drawMode==='qty';
+  document.querySelectorAll('.pct-input').forEach(x=>x.style.display=qtyMode?'none':'block');
+  document.querySelectorAll('.qty-input').forEach(x=>x.style.display=qtyMode?'block':'none');
+  document.querySelectorAll('.jackpot-label').forEach(x=>x.style.display=qtyMode?'inline-flex':'none');
+  document.querySelector('#valueHead').textContent=qtyMode?'Số lượng quà':'Tỷ lệ %';
+}
+
+function updateAdmin(){
+  const qtyMode=drawMode==='qty';
+  modePct.classList.toggle('active',!qtyMode);
+  modeQty.classList.toggle('active',qtyMode);
+  pctHelp.style.display=qtyMode?'none':'block';
+  qtyHelp.style.display=qtyMode?'block':'none';
+  thresholdBox.style.display=qtyMode?'flex':'none';
+  thresholdExplain.style.display=qtyMode?'block':'none';
+  inventoryBox.style.display=qtyMode?'block':'none';
+  modeText.textContent=qtyMode?'Số lượng':'%';
+  refreshRowMode();
+
+  if(qtyMode){
+    thresholdInput.value=jackpotThresholdPct;
+    const total=normalInitialTotal(), threshold=jackpotThreshold();
+    thresholdExplain.textContent=total
+      ? `Tổng quà thường ban đầu: ${total}. Với ngưỡng ${jackpotThresholdPct}% → cần phát ${threshold} quà thường trước khi Jackpot được mở.`
+      : 'Chưa có quà thường.';
+    const normalRemain=prizes.reduce((s,p)=>s+(p.jackpot?0:p.qty),0);
+    const jackRemain=prizes.reduce((s,p)=>s+(p.jackpot?p.qty:0),0);
+    normalRemainingEl.textContent=normalRemain;
+    jackpotRemainingEl.textContent=jackRemain;
+    cycleCountEl.textContent=`${Math.min(state.normalCycleCount,threshold)} / ${threshold}`;
+    customerStock.textContent=normalRemain>0?`Quà thường còn: ${normalRemain}`:'';
+  }else{
+    customerStock.textContent='';
+  }
+
+  const s=totalWeight();
+  msg.textContent=qtyMode
+    ? (jackpotUnlocked()?'🔥 JACKPOT ĐÃ ĐƯỢC MỞ CHO LẦN QUAY TIẾP THEO.':'🔒 Jackpot đang khóa theo chu kỳ quà.')
+    : (s?'Tỷ lệ được chuẩn hóa theo tổng '+(Math.round(s*10)/10)+'%.':'⚠️ Chưa có tỷ lệ hợp lệ.');
+  renderStats();
+}
+
+function draw(){
+  const cx=450,cy=450,r=410,n=prizes.length,step=Math.PI*2/n;
+  ctx.clearRect(0,0,900,900);
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(angle+Math.PI/2);
+  for(let i=0;i<n;i++){
+    const a=i*step;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,a,a+step);ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.stroke();
+    ctx.save();ctx.rotate(a+step/2);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.font='900 27px system-ui';
+    let t=prizes[i].name||'Phần thưởng';if(t.length>18)t=t.slice(0,17)+'…';
+    ctx.fillText(t,r-28,9);ctx.restore();
+  }
+  ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,59,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#ffb300';ctx.lineWidth=8;ctx.stroke();
+}
+
+function pctPick(){
+  const s=totalWeight();
+  if(s<=0)return -1;
+  let x=Math.random()*s;
+  for(let i=0;i<prizes.length;i++){x-=num(prizes[i].pct);if(x<0)return i}
+  return prizes.length-1;
+}
+
+function qtyPick(){
+  const jackpots=[],normal=[];
+  prizes.forEach((p,i)=>{
+    if(p.qty<=0)return;
+    if(p.jackpot)jackpots.push(i);else normal.push(i);
+  });
+
+  // Jackpot is only eligible after the normal-gift threshold.
+  if(jackpotUnlocked()&&jackpots.length){
+    const total=jackpots.reduce((s,i)=>s+prizes[i].qty,0);
+    let x=Math.random()*total;
+    for(const i of jackpots){x-=prizes[i].qty;if(x<0)return i}
+    return jackpots[jackpots.length-1];
+  }
+
+  if(!normal.length){
+    if(jackpots.length){
+      return jackpots[Math.floor(Math.random()*jackpots.length)];
+    }
+    return -1;
+  }
+
+  // Normal prizes are selected proportionally to remaining quantity.
+  const total=normal.reduce((s,i)=>s+prizes[i].qty,0);
+  let x=Math.random()*total;
+  for(const i of normal){x-=prizes[i].qty;if(x<0)return i}
+  return normal[normal.length-1];
+}
+
+function pick(){return drawMode==='qty'?qtyPick():pctPick()}
+
+function consumeQuantity(idx){
+  if(drawMode!=='qty')return;
+  const p=prizes[idx];
+  if(p.qty<=0)return;
+  p.qty--;
+  if(p.jackpot)state.normalCycleCount=0;
+  else state.normalCycleCount++;
+  saveAll();
+}
+
+function recordResult(idx){
+  const name=prizes[idx].name||'Phần thưởng';
+  statsData.total++;
+  statsData.last=name;
+  statsData.counts[name]=(statsData.counts[name]||0)+1;
+  statsData.history.unshift({name,time:new Date().toLocaleTimeString('vi-VN')});
+  statsData.history=statsData.history.slice(0,100);
+  saveAll();
+}
+
+
+function fireConfetti(){
+  const layer=document.querySelector('#confetti');
+  if(!layer)return;
+  const flash=document.createElement('div');
+  flash.className='jackpotFlash';
+  document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(),800);
+
+  const colors=['#ffd43b','#ff1744','#00e5ff','#00c853','#d500f9','#ffffff','#ff8f00'];
+  const count=110;
+  for(let i=0;i<count;i++){
+    const el=document.createElement('span');
+    el.className='confetti-piece';
+    el.style.left=(8+Math.random()*84)+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.width=(6+Math.random()*7)+'px';
+    el.style.height=(9+Math.random()*10)+'px';
+    el.style.setProperty('--dx',(-180+Math.random()*360)+'px');
+    el.style.setProperty('--rot',(360+Math.random()*1080)+'deg');
+    el.style.animationDelay=(Math.random()*.45)+'s';
+    layer.appendChild(el);
+    setTimeout(()=>el.remove(),3400);
+  }
+}
+
+function spinWheel(){
+  if(busy)return;
+  const idx=pick();
+  if(idx<0){
+    result.textContent=drawMode==='qty'?'⚠️ Đã hết quà có thể phát':'⚠️ Chưa có tỷ lệ hợp lệ';
+    return;
+  }
+
+  const n=prizes.length,step=Math.PI*2/n,start=angle;
+  const norm=((start%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  // The pointer is at the top. The selected slice's CENTER must end exactly under it.
+  const desired=-Math.PI-(idx*step+step/2);
+  let delta=desired-norm;
+  while(delta<0)delta+=Math.PI*2;
+  delta+=(5+Math.floor(Math.random()*3))*Math.PI*2;
+
+  const end=start+delta,t0=performance.now();
+  busy=true;spin.disabled=true;
+  result.classList.remove('win','jackpot');
+  result.textContent='Đang quay…';
+
+  function f(t){
+    const q=Math.min(1,(t-t0)/4200),e=1-Math.pow(1-q,4);
+    angle=start+(end-start)*e;draw();
+    if(q<1)requestAnimationFrame(f);
+    else{
+      angle=end;draw();busy=false;spin.disabled=false;
+      consumeQuantity(idx);
+      recordResult(idx);
+      result.classList.remove('win','jackpot');
+      void result.offsetWidth;
+      result.classList.add('win');
+      result.textContent='🎉 '+(prizes[idx].name||'Phần thưởng');
+      if(prizes[idx].jackpot){
+        result.classList.add('jackpot');
+        fireConfetti();
+      }
+      updateAdmin();
+    }
+  }
+  requestAnimationFrame(f);
+}
+
+function renderStats(){
+  const total=statsData.total;
+  totalEl.textContent=total;
+  lastEl.textContent=statsData.last.length>14?statsData.last.slice(0,13)+'…':statsData.last;
+
+  if(drawMode==='qty'){
+    statsList.innerHTML=prizes.map(p=>{
+      const c=statsData.counts[p.name]||0;
+      const remain=p.qty;
+      return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${esc(p.name)}${p.jackpot?' 🔥':''}</span><span>Đã trúng: ${c} · Còn: ${remain}</span></div><div class="bar"><i style="width:${Math.min(100,total?c/total*100:0)}%"></i></div></div>`;
+    }).join('');
+  }else{
+    const s=totalWeight();
+    statsList.innerHTML=prizes.map(p=>{
+      const c=statsData.counts[p.name]||0,actual=total?c/total*100:0,expected=s?num(p.pct)/s*100:0;
+      return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${esc(p.name)}</span><span>${c} lần · ${actual.toFixed(2)}% / ${expected.toFixed(2)}%</span></div><div class="bar"><i style="width:${Math.min(100,actual)}%"></i></div></div>`;
+    }).join('');
+  }
+
+  historyEl.innerHTML=statsData.history.length
+    ?statsData.history.map((h,i)=>`<div class="hrow"><span>#${total-i} · ${esc(h.name)}</span><span class="muted">${h.time}</span></div>`).join('')
+    :'<span class="muted">Chưa có lượt quay.</span>';
+}
+
+function setMode(mode){
+  drawMode=mode;
+  localStorage.setItem('vong_quay_draw_mode',drawMode);
+  buildRows();draw();updateAdmin();
+}
+
+document.querySelector('#modePct').onclick=()=>setMode('pct');
+document.querySelector('#modeQty').onclick=()=>setMode('qty');
+
+thresholdInput.oninput=()=>{
+  jackpotThresholdPct=Math.max(1,Math.min(100,Number(thresholdInput.value)||50));
+  localStorage.setItem('vong_quay_jackpot_threshold',String(jackpotThresholdPct));
+  updateAdmin();
+};
+
 document.querySelector('#adminOpen').onclick=()=>{
   if(admin.classList.contains('show')){
     admin.classList.remove('show');
@@ -80,29 +607,84 @@ document.querySelector('#adminOpen').onclick=()=>{
     admin.scrollIntoView({behavior:'smooth',block:'start'});
   }
 };
+
 document.querySelector('#closeAdmin').onclick=()=>{
   admin.classList.remove('show');
   document.querySelector('#adminOpen').textContent='⚙️ Cài đặt';
   window.scrollTo({top:0,behavior:'smooth'});
 };
+
 document.querySelector('#save').onclick=()=>{
-  saveConfig();
+  saveAll();
+  msg.textContent='✓ Đã lưu cấu hình.';
   setTimeout(()=>{
     admin.classList.remove('show');
     document.querySelector('#adminOpen').textContent='⚙️ Cài đặt';
     window.scrollTo({top:0,behavior:'smooth'});
   },350);
 };
-document.querySelector('#add').onclick=()=>{prizes.push({name:'Phần thưởng mới',pct:0,count:0});buildRows();rows.lastElementChild.querySelector('.name').focus()};
+
+document.querySelector('#add').onclick=()=>{
+  prizes.push({id:uid(),name:'PHẦN THƯỞNG MỚI',pct:0,qty:1,jackpot:false});
+  originalQty.push(1);
+  saveAll();buildRows();rows.lastElementChild?.querySelector('.name')?.focus();
+};
+
 document.querySelector('#reset').onclick=()=>{
-  if(confirm('Khôi phục cấu hình mặc định?')){
-    prizes=structuredClone(defaults);
-    saveConfig();
-    buildRows();
+  if(confirm('Khôi phục cấu hình mặc định và kho quà mặc định?')){
+    prizes=structuredClone(defaultPrizes);
+    originalQty=prizes.map(p=>p.qty);
+    state={normalCycleCount:0,initialQty:originalQty.slice()};
+    drawMode='qty';jackpotThresholdPct=50;
+    statsData={total:0,last:'—',history:[],counts:{}};
+    saveAll();buildRows();draw();updateAdmin();
   }
 };
-document.querySelector('#clearStats').onclick=()=>{if(confirm('Xóa toàn bộ thống kê và lịch sử?')){statsData={total:0,last:'—',history:[],counts:{}};saveStats();renderStats()}};
-spin.onclick=spinWheel;buildRows();renderStats();
+
+function doResetSpins(){
+  statsData={total:0,last:'—',history:[],counts:{}};
+  state.normalCycleCount=0;
+  saveAll(); renderStats(); updateAdmin();
+  msg.textContent='✓ Đã reset số lượt quay + tiến độ Jackpot về 0.';
+  msg.style.boxShadow='0 0 0 2px #35e0a1 inset';
+  setTimeout(()=>msg.style.boxShadow='',700);
+}
+
+function doResetInventory(){
+  prizes.forEach((p,i)=>{ p.qty=Math.max(0,Math.floor(Number(originalQty[i])||0)); });
+  state.normalCycleCount=0;
+  saveAll(); buildRows(); draw(); updateAdmin();
+  msg.textContent='✓ Đã khôi phục toàn bộ số lượng quà về ban đầu.';
+  msg.style.boxShadow='0 0 0 2px #ffd43b inset';
+  setTimeout(()=>msg.style.boxShadow='',700);
+}
+
+// Global handlers: work both from file:// and from GitHub Pages.
+window.__resetSpins=(e)=>{ if(e){e.preventDefault();e.stopPropagation();} doResetSpins(); };
+window.__resetInventory=(e)=>{ if(e){e.preventDefault();e.stopPropagation();} doResetInventory(); };
+document.querySelector('#resetSpins').onclick=window.__resetSpins;
+document.querySelector('#resetInventory').onclick=window.__resetInventory;
+
+document.querySelector('#clearStats').onclick=()=>{
+  if(confirm('Xóa toàn bộ thống kê và lịch sử?')){
+    statsData={total:0,last:'—',history:[],counts:{}};
+    saveAll();renderStats();
+  }
+};
+
+spin.onclick=spinWheel;
+
+// First-run state for the supplied quantity setup.
+if(!Array.isArray(originalQty)||originalQty.length!==prizes.length){
+  originalQty=prizes.map(p=>Math.max(0,Math.floor(Number(p.qty)||0)));
+  localStorage.setItem(ORIGINAL_KEY,JSON.stringify(originalQty));
+}
+state.initialQty=originalQty.slice();
+saveAll();
+
+buildRows();
+draw();
+updateAdmin();
 })();
 </script>
 </body>
