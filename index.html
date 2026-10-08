@@ -162,7 +162,7 @@ button:active{transform:translateY(0) scale(.98)}
   <div class="section-title">📦 Kho quà & tiến độ Jackpot</div>
   <div class="inventory-stats">
     <div class="inventory-stat"><strong id="normalRemaining">0</strong><span>quà thường còn</span></div>
-    <div class="inventory-stat"><strong id="cycleCount">0 / 0</strong><span>tiến độ mở Jackpot</span></div>
+    <div class="inventory-stat"><strong id="cycleCount">0 / 0</strong><span>quà thường trước Jackpot</span></div>
     <div class="inventory-stat"><strong id="jackpotRemaining">0</strong><span>Jackpot còn lại</span></div>
   </div>
   <div class="actions">
@@ -218,6 +218,7 @@ const CONFIG_KEY='vong_quay_v5_config';
 const STATS_KEY='vong_quay_v5_stats';
 const STATE_KEY='vong_quay_v5_state';
 const ORIGINAL_KEY='vong_quay_v5_original_qty';
+const ORIGINAL_MAP_KEY='vong_quay_v6_original_qty_by_id';
 const OLD_KEY='vong_quay_v2_config';
 
 const defaultPrizes=[
@@ -236,9 +237,13 @@ let statsData=loadStats();
 let state=loadState();
 let prizes=loadConfig();
 let originalQty=loadOriginalQty();
-if(!originalQty){
+// If there have been no spins yet, the currently configured quantities are the true baseline.
+// This repairs older V5/V6 data where editing a quantity did not update the reset baseline.
+if(!originalQty || statsData.total===0){
   originalQty=prizes.map(p=>Math.max(0,Math.floor(Number(p.qty)||0)));
   localStorage.setItem(ORIGINAL_KEY,JSON.stringify(originalQty));
+  // Fresh setup uses the requested 50% rule: 98 normal gifts => 49 before Jackpot.
+  if(statsData.total===0) jackpotThresholdPct=50;
 }
 let angle=-Math.PI/2,busy=false;
 
@@ -347,7 +352,8 @@ function buildRows(){
     };
     d.querySelector('.qty-input').oninput=e=>{
       p.qty=Math.max(0,Math.floor(Number(e.target.value)||0));
-      // Changing quantity updates the live stock, but reset returns to the saved original stock.
+      // Editing a prize quantity defines the new reset baseline for that prize.
+      originalQty[i]=p.qty;
       saveAll();updateAdmin();
     };
     d.querySelector('.jackpot').onchange=e=>{
